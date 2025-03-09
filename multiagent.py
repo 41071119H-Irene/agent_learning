@@ -6,7 +6,7 @@ import asyncio
 load_dotenv()
 
 from autogen_agentchat.agents import AssistantAgent
-from autogen_agentchat.conditions import TextMentionTermination
+from autogen_agentchat.conditions import MaxMessageTermination
 from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_agentchat.ui import Console
 from autogen_ext.models.openai import OpenAIChatCompletionClient
@@ -28,7 +28,7 @@ async def run_chat():
     web_surfer = MultimodalWebSurfer("web_surfer", model_client)  # 負責網頁搜尋
     
     # 當對話中出現 "exit" 時即終止對話
-    termination_condition = TextMentionTermination("OK")
+    termination_condition = MaxMessageTermination(max_messages=10)
     
     # 建立一個循環團隊，讓各代理人依序參與討論
     team = RoundRobinGroupChat(
