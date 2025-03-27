@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diary Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+        <h2>📂 上傳日誌</h2>
+        <input type="file" name="file" required>
+        <button type="submit">提交</button>
+    </form>
+
+    <div class="sidebar"> 
+        <h3>分析結果</h3>
+        <ul id="analysis-list"></ul>
+    
+        <h3>建議</h3>
+        <ul id="recommendation-list"></ul>
+    
+        <h3>情緒走向</h3>
+        <img id="moodTrendImg" src="" alt="情緒走向">
+    </div>
+
+    <script>
+        document.getElementById("upload-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // 防止頁面重整
+
+            let formData = new FormData(this);
+
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json()) 
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // 更新 "分析" 區塊
+                let analysisList = document.getElementById("analysis-list");
+                analysisList.innerHTML = "";  
+                data.analysis.forEach(item => {
+                    let li = document.createElement("li");
+                    li.textContent = item;
+                    analysisList.appendChild(li);
+                });
+
+                // 更新 "建議" 區塊
+                let recommendationList = document.getElementById("recommendation-list");
+                recommendationList.innerHTML = "";  
+                data.recommendations.forEach(item => {
+                    let li = document.createElement("li");
+                    li.textContent = item;
+                    recommendationList.appendChild(li);
+                });
+
+                // 更新圖片
+                let moodTrendImg = document.getElementById("moodTrendImg");
+                moodTrendImg.src = data.mood_trend_image + "?t=" + new Date().getTime();
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
+</body>
+</html>
